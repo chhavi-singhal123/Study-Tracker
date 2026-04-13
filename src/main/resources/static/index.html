@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Study Tracker</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    overflow: hidden;
+}
+
+/* Floating shapes */
+.circle {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    animation: float 8s infinite ease-in-out;
+}
+
+.circle:nth-child(1) {
+    width: 200px;
+    height: 200px;
+    top: 10%;
+    left: 10%;
+}
+
+.circle:nth-child(2) {
+    width: 300px;
+    height: 300px;
+    bottom: 10%;
+    right: 10%;
+    animation-delay: 2s;
+}
+
+@keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-40px); }
+}
+
+/* Main Card */
+.container {
+    text-align: center;
+    z-index: 1;
+    animation: fadeIn 1.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+h1 {
+    font-size: 60px;
+    margin-bottom: 10px;
+}
+
+p {
+    font-size: 20px;
+    margin-bottom: 30px;
+    opacity: 0.8;
+}
+
+/* Button */
+button {
+    padding: 15px 40px;
+    font-size: 18px;
+    border: none;
+    border-radius: 30px;
+    background: linear-gradient(45deg, #ff6a00, #ee0979);
+    color: white;
+    cursor: pointer;
+    transition: 0.4s;
+}
+
+button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(255,255,255,0.3);
+}
+</style>
+</head>
+
+<body>
+
+<div class="circle"></div>
+<div class="circle"></div>
+
+<div class="container">
+    <h1>📚 Study Tracker</h1>
+    <p>Track your daily learning & boost productivity 🚀</p>
+
+    <button onclick="goLogin()">Get Started</button>
+</div>
+
+<script>
+function goLogin() {
+    window.location.href = "login.html";
+}
+</script>
+
+</body>
+</html>

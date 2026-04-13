@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard - Study Tracker</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+
+body{
+    display:flex;
+    height:100vh;
+    background:#0f172a;
+    color:white;
+}
+
+/* Sidebar */
+.sidebar{
+    width:250px;
+    background:#1e293b;
+    padding:20px;
+}
+.sidebar h2{margin-bottom:30px;color:#38bdf8;}
+.sidebar ul{list-style:none;}
+.sidebar ul li{
+    padding:12px;
+    margin:10px 0;
+    cursor:pointer;
+    border-radius:8px;
+}
+.sidebar ul li:hover{background:#38bdf8;}
+
+/* Main */
+.main{flex:1;padding:20px;}
+
+/* Cards */
+.card-container{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+}
+.card{
+    padding:20px;
+    border-radius:15px;
+    background:linear-gradient(135deg,#6366f1,#8b5cf6);
+}
+
+/* Section */
+.section{display:none;}
+.active{display:block;}
+
+button{
+    margin-top:10px;
+    padding:8px 12px;
+    border:none;
+    border-radius:8px;
+    background:#38bdf8;
+    cursor:pointer;
+}
+
+input,textarea{
+    padding:8px;
+    margin-top:5px;
+    border-radius:6px;
+    border:none;
+}
+
+/* Graph */
+.graph-box{
+    margin-top:30px;
+    padding:20px;
+    background:#1e293b;
+    border-radius:15px;
+    text-align:center;
+}
+
+.bar-graph{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    height:150px;
+    margin-top:20px;
+}
+.bar{
+    width:30px;
+    background:linear-gradient(180deg,#00ffcc,#38bdf8);
+    border-radius:8px 8px 0 0;
+}
+.bar span{
+    font-size:12px;
+    display:block;
+    margin-top:5px;
+}
+
+/* Heartbeat */
+.heartbeat{width:100%;height:100px;}
+.heartbeat path{
+    fill:none;
+    stroke:#00ffcc;
+    stroke-width:3;
+    stroke-dasharray:400;
+    stroke-dashoffset:400;
+    animation:beat 3s infinite linear;
+}
+@keyframes beat{
+    to{stroke-dashoffset:0;}
+}
+
+/* Extra Info */
+.info-box{
+    margin-top:20px;
+}
+.info{
+    background:#334155;
+    padding:10px;
+    border-radius:8px;
+    margin-top:5px;
+}
+
+/* Profile */
+.profile-box{
+    margin-top:20px;
+    background:#1e293b;
+    padding:20px;
+    border-radius:10px;
+    max-width:400px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>📚 Study Tracker</h2>
+    <ul>
+        <li onclick="show('home')">🏠 Home</li>
+        <li onclick="show('goals')">🎯 Goals</li>
+        <li onclick="show('notes')">📝 Notes</li>
+        <li onclick="show('timer')">⏱ Timer</li>
+        <li onclick="openTasks()">📋 Tasks</li>
+
+        <!-- ✅ NEW PROFILE OPTION -->
+        <li onclick="show('profile')">👤 Profile</li>
+
+        <li onclick="logout()">🚪 Logout</li>
+    </ul>
+</div>
+
+<div class="main">
+
+<h1>Welcome 👋 <span id="user"></span></h1>
+
+<!-- HOME -->
+<div id="home" class="section active">
+
+<div class="card-container">
+    <div class="card" id="studyCard">📘 Study Time: 0 hrs</div>
+    <div class="card">✅ Tasks Completed: 0</div>
+    <div class="card" id="streakCard">🔥 Streak: 0 Days</div>
+</div>
+
+<div class="graph-box">
+<h2>📊 Study Progress</h2>
+
+<svg class="heartbeat" viewBox="0 0 500 100">
+<path d="M0 50 L50 50 L70 20 L90 80 L110 40 L130 50 
+L180 50 L200 10 L220 90 L240 50 
+L300 50 L320 30 L340 70 L360 50 L500 50"/>
+</svg>
+
+<div class="bar-graph" id="graph"></div>
+
+<button onclick="addStudy()">➕ Add Study Hour</button>
+<button onclick="addInfo()">✨ Add More Info</button>
+
+</div>
+
+<div class="info-box" id="infoBox"></div>
+
+</div>
+
+<!-- ✅ PROFILE SECTION (NEW) -->
+<div id="profile" class="section">
+<h2>👤 Profile Details</h2>
+
+<div class="profile-box">
+<input id="name" placeholder="Enter Name"><br>
+<input id="email" placeholder="Enter Email"><br>
+<input id="age" placeholder="Enter Age"><br>
+<input id="course" placeholder="Course"><br>
+
+<button onclick="saveProfile()">Save</button>
+<p id="savedMsg"></p>
+</div>
+</div>
+
+<!-- GOALS -->
+<div id="goals" class="section">
+<h2>🎯 Goals</h2>
+<input id="goalInput" placeholder="Enter goal">
+<button onclick="addGoal()">Add</button>
+<ul id="goalList"></ul>
+</div>
+
+<!-- NOTES -->
+<div id="notes" class="section">
+<h2>📝 Notes</h2>
+<textarea id="noteInput"></textarea>
+<button onclick="saveNote()">Save</button>
+<p id="savedNote"></p>
+</div>
+
+<!-- TIMER -->
+<!-- TIMER -->
+<div id="timer" class="section">
+<h2>⏱ Pomodoro Timer</h2>
+
+<h1 id="time">25:00</h1>
+
+<button onclick="startTimer()">Start</button>
+<button onclick="stopTimer()">Stop</button>
+<button onclick="resetTimer()">Reset</button>
+</div>
+
+<script>
+
+/* ✅ NAME SHOW (email se name nikalega) */
+let email = localStorage.getItem("user") || "Guest";
+
+// email se username nikaalna
+let rawName = email.includes("@") ? email.split("@")[0] : email;
+
+// numbers remove
+rawName = rawName.replace(/[0-9]/g, "");
+
+// space add (agar lowercase joined hai jaise chhavisinghal)
+rawName = rawName.replace(/([a-z])([A-Z])/g, '$1 $2');
+
+// first letter capital
+rawName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+
+// agar 2 naam ho to dono capital
+rawName = rawName.split(" ").map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1)
+).join(" ");
+
+document.getElementById("user").innerText = rawName;
+
+/* NAV */
+function show(sec){
+document.querySelectorAll('.section').forEach(s=>s.classList.remove("active"));
+document.getElementById(sec).classList.add("active");
+}
+
+/* TASK PAGE */
+function openTasks(){
+    window.location.href = "tasks.html";
+}
+
+/* PROFILE SAVE */
+function saveProfile(){
+    let profile = {
+        name: document.getElementById("name").value,
+        email: document.getElementById("email").value,
+        age: document.getElementById("age").value,
+        course: document.getElementById("course").value
+    };
+
+    localStorage.setItem("profile", JSON.stringify(profile));
+    document.getElementById("savedMsg").innerText = "Saved ✅";
+}
+
+/* LOAD PROFILE */
+let p = JSON.parse(localStorage.getItem("profile"));
+if(p){
+    document.getElementById("name").value = p.name || "";
+    document.getElementById("email").value = p.email || "";
+    document.getElementById("age").value = p.age || "";
+    document.getElementById("course").value = p.course || "";
+}
+
+/* STUDY + STREAK */
+let today=new Date().toDateString();
+let last=localStorage.getItem("lastDate");
+let study=parseInt(localStorage.getItem("study"))||0;
+let streak=parseInt(localStorage.getItem("streak"))||0;
+
+if(last!==today){
+if(last!==null) streak++;
+study=0;
+localStorage.setItem("lastDate",today);
+localStorage.setItem("study",study);
+localStorage.setItem("streak",streak);
+}
+
+document.getElementById("studyCard").innerText="📘 Study Time: "+study+" hrs";
+document.getElementById("streakCard").innerText="🔥 Streak: "+streak+" Days";
+
+/* GRAPH */
+let data=JSON.parse(localStorage.getItem("week"))||[1,2,3,2,4,1,5];
+let graph=document.getElementById("graph");
+
+let days=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+
+data.forEach((d,i)=>{
+let div=document.createElement("div");
+div.className="bar";
+div.style.height=(d*20)+"px";
+div.innerHTML="<span>"+days[i]+"</span>";
+graph.appendChild(div);
+});
+
+/* ADD STUDY */
+function addStudy(){
+study++;
+data[new Date().getDay()]=study;
+
+localStorage.setItem("study",study);
+localStorage.setItem("week",JSON.stringify(data));
+
+location.reload();
+}
+
+/* GOAL */
+function addGoal(){
+let val=document.getElementById("goalInput").value;
+let li=document.createElement("li");
+li.innerHTML=val+" ❌";
+li.onclick=()=>li.remove();
+document.getElementById("goalList").appendChild(li);
+}
+
+/* NOTES */
+function saveNote(){
+let note=document.getElementById("noteInput").value;
+localStorage.setItem("note",note);
+document.getElementById("savedNote").innerText="Saved!";
+}
+
+/* TIMER */
+let seconds = 0;
+let timer = null;
+let running = false;
+
+function updateDisplay() {
+    let m = Math.floor(seconds / 60);
+    let s = seconds % 60;
+
+    document.getElementById("time").innerText =
+        m + ":" + (s < 10 ? "0" + s : s);
+}
+
+/* START */
+function startTimer() {
+    if (running) return;
+
+    running = true;
+
+    timer = setInterval(() => {
+        seconds++;
+        updateDisplay();
+    }, 1000);
+}
+
+/* STOP */
+function stopTimer() {
+    clearInterval(timer);
+    running = false;
+}
+
+/* RESET */
+function resetTimer() {
+    clearInterval(timer);
+    running = false;
+    seconds = 0;
+    updateDisplay();
+}
+
+/* show 0:00 initially */
+updateDisplay();
+
+
+
+
+
+/* initial display */
+updateDisplay();
+
+/* EXTRA INFO */
+function addInfo(){
+let txt=prompt("Enter extra info:");
+if(txt){
+let div=document.createElement("div");
+div.className="info";
+div.innerText="📌 "+txt;
+document.getElementById("infoBox").appendChild(div);
+}
+}
+
+/* LOGOUT */
+function logout(){
+localStorage.clear();
+window.location.href="login.html";
+}
+
+</script>
+
+</body>
+</html>

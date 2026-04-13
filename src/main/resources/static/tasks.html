@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tasks - Study Tracker</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    height: 100vh;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+/* MAIN CONTAINER */
+.container {
+    width: 500px;
+    padding: 25px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+/* HEADER */
+.header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+h2 {
+    color: #38bdf8;
+}
+
+.back {
+    cursor: pointer;
+}
+
+/* INPUT */
+.input-box {
+    display: flex;
+    gap: 10px;
+}
+
+input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+}
+
+button {
+    padding: 10px 15px;
+    border-radius: 10px;
+    border: none;
+    background: #38bdf8;
+    cursor: pointer;
+}
+
+/* TASK */
+.task {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: 0.3s;
+}
+
+.task:hover {
+    transform: scale(1.03);
+}
+
+/* DONE */
+.done {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+/* ACTION */
+.actions button {
+    margin-left: 5px;
+}
+
+/* PROGRESS */
+.progress-box {
+    margin-top: 20px;
+}
+
+.progress-bar {
+    height: 10px;
+    background: #334155;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #00ffcc, #38bdf8);
+    transition: 0.5s;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h2>📋 Tasks</h2>
+        <span class="back" onclick="goBack()">⬅</span>
+    </div>
+
+    <!-- INPUT -->
+    <div class="input-box">
+        <input type="text" id="taskInput" placeholder="Add new task...">
+        <button onclick="addTask()">+</button>
+    </div>
+
+    <!-- TASK LIST -->
+    <div id="taskList"></div>
+
+    <!-- PROGRESS -->
+    <div class="progress-box">
+        <p id="progressText">0% Completed</p>
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+// ADD TASK
+function addTask() {
+    let input = document.getElementById("taskInput");
+    if(input.value === "") return;
+
+    tasks.push({name: input.value, done: false});
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+
+    input.value = "";
+    loadTasks();
+}
+
+// LOAD TASKS
+function loadTasks() {
+    let list = document.getElementById("taskList");
+    list.innerHTML = "";
+
+    tasks.forEach((task, index) => {
+
+        let div = document.createElement("div");
+        div.className = "task";
+
+        if(task.done) div.classList.add("done");
+
+        div.innerHTML = `
+            <span>${task.name}</span>
+            <div class="actions">
+                <button onclick="completeTask(${index})">✔</button>
+                <button onclick="deleteTask(${index})">❌</button>
+            </div>
+        `;
+
+        list.appendChild(div);
+    });
+
+    updateProgress();
+}
+
+// COMPLETE
+function completeTask(index) {
+    tasks[index].done = !tasks[index].done;
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    loadTasks();
+}
+
+// DELETE
+function deleteTask(index) {
+    tasks.splice(index, 1);
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    loadTasks();
+}
+
+// PROGRESS
+function updateProgress() {
+    let total = tasks.length;
+    let done = tasks.filter(t => t.done).length;
+
+    let percent = total === 0 ? 0 : (done / total) * 100;
+
+    document.getElementById("progressText").innerText =
+        Math.floor(percent) + "% Completed";
+
+    document.querySelector(".progress-fill").style.width = percent + "%";
+}
+
+// BACK
+function goBack() {
+    window.location.href = "dashboard.html";
+}
+
+// INIT
+loadTasks();
+
+</script>
+
+</body>
+</html>
